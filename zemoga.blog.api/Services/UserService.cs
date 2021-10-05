@@ -10,11 +10,9 @@ namespace zemoga.blog.api.Services
 {
     public interface IUserService
     {
-        public User Register(UserRegisterDTO userRegister);
-        public User Login(UserLoginDTO userLogin);
-        public Task<User> Validate(string username, string password);
-        public Task<List<UserRole>> UserInRole(int userId);
-
+        Task Register(UserRegisterDTO userRegister);
+        
+        Task<UserDTO> VerifyCredentials(string username, string password);
 
     }
     public class UserService : IUserService
@@ -24,42 +22,59 @@ namespace zemoga.blog.api.Services
         {
             _repository = repositoryWrapper;
         }
-        public User Login(UserLoginDTO userLogin)
+        
+
+        public async Task Register(UserRegisterDTO userRegister)
         {
-            throw new NotImplementedException();
+            var user = new User()
+            {
+                UserName = userRegister.Username,
+                Password = userRegister.Password
+            };
+
+            this._repository.User.Create(user);
+            await this._repository.SaveAsync();         
+            
+            foreach (var r in userRegister.Roles)
+            {
+                var userRole = (new UserRole()
+                {
+                    UserId = user.UserId,
+                    RoleId = r
+                });
+                this._repository.UserRole.Create(userRole);
+            }
+            await this._repository.SaveAsync();
+
         }
 
-        public User Register(UserRegisterDTO userRegister)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<User> Validate(string username, string password)
+        public async Task<UserDTO> VerifyCredentials(string username, string password)
         {
             var user =  await _repository.User.GetByCondition(u => u.UserName == username && u.Password == password);
-            if(user != null && user.Any())
+            if (user != null && user.Any())
             {
-                 
-                return user.First();
+                var userDto = user.Select(u => new UserDTO()
+                {
+                    UserId = u.UserId,
+                    Username = u.UserName
+
+                }).FirstOrDefault();
+                var userRoles = await _repository.UserRole.GetByCondition(ur => ur.UserId == userDto.UserId);
+                var roles = await _repository.Role.GetAll();
+                userDto.Roles = new List<string>();
+                foreach (var ur in userRoles)
+                {
+                    var role = roles.Where(m => m.RoleId == ur.RoleId).First();
+                    userDto.Roles.Add(role.Name);
+                }
+
+                return userDto;
             }
 
             return null;
 
         }
 
-        public async Task<List<UserRole>> UserInRole(int userId)
-        {
-
-            var userRoles = await _repository.UserRole.GetByCondition(ur => ur.UserId == userId);
-            var roles = await _repository.Role.GetAll();
-            
-            foreach(var ur in userRoles)
-            {
-                var role = roles.Where(m => m.RoleId == ur.RoleId).First();
-                ur.Role = role;
-            }
-            return userRoles;
-
-        }
+       
     }
 }

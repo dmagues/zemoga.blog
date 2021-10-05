@@ -11,6 +11,8 @@ namespace zemoga.blog.api.Business
     {
         public static void Init(BlogContext context)
         {
+
+
             if (context.Users.Any())
             {
                 return;
@@ -77,9 +79,6 @@ namespace zemoga.blog.api.Business
                 }
             };
 
-
-
-            
             foreach (var ur in userRoles)
             {
                 context.UsersRoles.Add(ur);

@@ -13,11 +13,8 @@ namespace zemoga.blog.api.Models
         public int PostId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
-        public DateTime PublishedDate { get; set; }
+        public DateTime? PublishedDate { get; set; }
         public PostStatus Status { get; set; }
-        [ForeignKey(nameof(Blog))]
-        public int BlogId { get; set; }
-        public Blog Blog { get; set; }
         [ForeignKey(nameof(User))]
         public int AuthorId { get; set; }
         public User Author { get; set; }

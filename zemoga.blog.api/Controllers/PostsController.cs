@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using zemoga.blog.api.Models;
+using zemoga.blog.api.Business.DTO;
 using zemoga.blog.api.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -18,49 +19,63 @@ namespace zemoga.blog.api.Controllers
     public class PostsController : ControllerBase
     {
         private IPostService _postService;
+        private ILogger<PostsController> _logger;
 
-        public PostsController(IPostService postService)
+        private int UserId => int.Parse(HttpContext.User.Claims.FirstOrDefault(
+             c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "0");
+
+        private string UserName => HttpContext.User.Identity.Name;
+
+        public PostsController(IPostService postService, ILogger<PostsController> logger)
         {
             this._postService = postService;
+            this._logger = logger;
         }
 
         [HttpGet("me")]
         [Authorize(Roles = "Writer")]
-        public async Task<IEnumerable<Post>> GetByUser()
+        public async Task<IEnumerable<PostDTO>> GetByUser()
         {
-            string userId = HttpContext.User.Claims.FirstOrDefault(
-             c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (!string.IsNullOrEmpty(userId))
-            {
-                return await this._postService.GetByUser(int.Parse(userId));
-            }
-
-            return Array.Empty<Post>();
+            return await this._postService.GetByUser(UserId);
+            
         }
         // GET: api/<PostsController>
         [HttpGet]        
-        public async Task<IEnumerable<Post>> Get()
+        public async Task<IEnumerable<PostDTO>> Get()
         {
             return await this._postService.Get();
         }
 
         // GET api/<PostsController>/5
         [HttpGet("{id}")]        
-        public async Task<Post> Get(int id)
+        public async Task<PostDTO> Get(int id)
         {
             return await this._postService.GetById(id);
         }
 
         [HttpGet("{id}/comments")]
-        public IEnumerable<Comment> GetComment(int id)
+        public async Task<List<CommentDTO>> GetComment(int id)
         {
-            return new Comment[] { };
+            return await this._postService.GetCommentsByPostId(id);
         }
 
         [HttpPost("{id}/comments")]
-        public void PostComment(int id, Comment comment)
+        public async Task<IActionResult> PostComment(int id, CommentDTO comment)
         {
-            
+            try
+            {
+                comment.AuthorId = UserId; ;
+                await this._postService.CreateComment(id, comment);
+                return Ok();
+            }catch(ApplicationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogError(ex, string.Format("Error in {0} ", nameof(PostComment)));
+                return StatusCode(500, string.Format("Error in {0}", nameof(PostComment)));
+            }
         }
 
         [HttpDelete("{id}/comments/{cid}")]
@@ -72,17 +87,47 @@ namespace zemoga.blog.api.Controllers
         // POST api/<PostsController>
         [HttpPost]
         [Authorize(Roles = "Writer")]
-        public void Post([FromBody] Post value)
+        public async Task<IActionResult> Post([FromBody] PostDTO value)
         {
-
+            ;
+            try
+            {
+                value.AuthorId = UserId;
+                await this._postService.Create(value);
+                return Ok();
+            }
+            catch (ApplicationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogError(ex, string.Format("Error in {0} ", nameof(Post)));
+                return StatusCode(500, string.Format("Error in {0} ", nameof(Post)));
+            }
         }
 
         // PUT api/<PostsController>/5
         [HttpPut("{id}")]
         [Authorize(Roles = "Writer")]
-        public void Put(int id, [FromBody] Post value)
+        public async Task<IActionResult> Put(int id, [FromBody] PostDTO value)
         {
+            
 
+            try
+            {
+                value.AuthorId = UserId;
+                await this._postService.Update(id, value);
+                return Ok();
+            }
+            catch (ApplicationException ex)
+            {
+                return BadRequest(ex.Message);
+            }catch(Exception ex)
+            {
+                this._logger.LogError(ex, string.Format("Error in {0} ", nameof(Put)));
+                return StatusCode(500, string.Format("Error in {0} ", nameof(Put)));
+            }
         }
 
         // DELETE api/<PostsController>/5
@@ -90,43 +135,70 @@ namespace zemoga.blog.api.Controllers
         [Authorize(Roles = "Writer")]
         public async Task<IActionResult> Delete(int id)
         {
-            var post = await this._postService.Delete(id);
-            if(post != null)
+            try
             {
+                await this._postService.Delete(id);
                 return StatusCode(204);
+            }catch(ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogError(ex, string.Format("Error in {0} ", nameof(Delete)));
+                return StatusCode(500, string.Format("Error in {0} ", nameof(Delete)));
             }
 
-            return NotFound("Post doesn't exists");
+
         }
 
         [HttpPut("{id}/approve")]
         [Authorize(Roles = "Editor")]
-        public async Task<IActionResult> PutApproveAsync(int id)
+        public async Task<IActionResult> PutApprove(int id)
         {
             try
             {
-                var post = await this._postService.GetById(id);
-                if (this._postService.ValidateApprove(post))
-                {
-                    return BadRequest (String.Format("Post {0} can't be apporved. Invalid status!", id));
-                }
-
-                this._postService.Approve(post);
+                await this._postService.Approve(id);
                 return Ok();
 
             }catch(ArgumentException argEx)
             {
                 return NotFound(argEx.Message);
-            }catch(Exception ex)
+            }
+            catch (ApplicationException ex)
             {
-                return StatusCode(500, ex.Message);
+                return BadRequest(ex.Message);
+            }            
+            catch (Exception ex)
+            {
+                this._logger.LogError(ex, string.Format("Error in {0} ", nameof(PutApprove)));
+                return StatusCode(500, string.Format("Error in {0} ", nameof(PutApprove)));
             }            
         }
 
         [HttpPut("{id}/reject")]
         [Authorize(Roles = "Editor")]
-        public void PutReject(int id)
+        public async Task<IActionResult> PutReject(int id)
         {
+            try
+            {
+                await this._postService.Reject(id);
+                return Ok();
+
+            }
+            catch (ArgumentException argEx)
+            {
+                return NotFound(argEx.Message);
+            }
+            catch (ApplicationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogError(ex, string.Format("Error in {0} ", nameof(PutReject)));
+                return StatusCode(500, string.Format("Error in {0} ", nameof(PutReject)));
+            }
         }
     }
 }

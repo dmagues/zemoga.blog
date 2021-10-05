@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using zemoga.blog.api.DataAccess.Helpers;
 using zemoga.blog.api.DataAccess.Infrastructure;
 
 namespace zemoga.blog.api.DataAccess.Repositories
@@ -13,6 +14,7 @@ namespace zemoga.blog.api.DataAccess.Repositories
     {
         Task<List<T>> GetAll();
         Task<List<T>> GetByCondition(Expression<Func<T, bool>> expression);
+        Task<List<T>> GetByConditionWithIncludes(Expression<Func<T, bool>> expression, params Expression<Func<T, object>>[] includes);
         void Create(T entity);
         void Update(T entity);
         void Delete(T entity);
@@ -33,6 +35,11 @@ namespace zemoga.blog.api.DataAccess.Repositories
         {
             return await this._blogContext.Set<T>().Where(expression).ToListAsync();
         }
+
+        public async Task<List<T>> GetByConditionWithIncludes(Expression<Func<T, bool>> expression, params Expression<Func<T, object>>[] includes)
+        {
+            return await this._blogContext.Set<T>().Where(expression).IncludeMultiple(includes).ToListAsync();
+        }
         public void Create(T entity)
         {
             this._blogContext.Set<T>().Add(entity);
@@ -45,5 +52,7 @@ namespace zemoga.blog.api.DataAccess.Repositories
         {
             this._blogContext.Set<T>().Remove(entity);
         }
+        
+
     }
 }

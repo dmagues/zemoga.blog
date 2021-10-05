@@ -10,10 +10,10 @@ namespace zemoga.blog.api.DataAccess.Repositories
     public interface IRepositoryWrapper
     {
         public IRepositoryBase<User> User { get; }
-        public IRepositoryBase<Blog> Blog { get; }
         public IRepositoryBase<Post> Post { get; }
         public IRepositoryBase<UserRole> UserRole { get; }
         public IRepositoryBase<Role> Role { get; }
+        public IRepositoryBase<Comment> Comment { get; }
         public void Save();
         public Task SaveAsync();
     }
@@ -21,10 +21,10 @@ namespace zemoga.blog.api.DataAccess.Repositories
     {
         private readonly BlogContext _context;
         private IRepositoryBase<User> _user;
-        private IRepositoryBase<Blog> _blog;
         private IRepositoryBase<Post> _post;
         private IRepositoryBase<UserRole> _userRole;
         private IRepositoryBase<Role> _role;
+        private IRepositoryBase<Comment> _comment;
 
         public RepositoryWrapper(BlogContext context)
         {
@@ -42,15 +42,7 @@ namespace zemoga.blog.api.DataAccess.Repositories
                 return _user;
             }
         }
-        public IRepositoryBase<Blog> Blog {
-            get { 
-                if(_blog == null)
-                {
-                    _blog = new BlogRepository(_context);
-                }
-                return _blog;
-            }
-        }
+       
         public IRepositoryBase<Post> Post { 
             get { 
                 if(_post == null)
@@ -83,6 +75,18 @@ namespace zemoga.blog.api.DataAccess.Repositories
                     _role = new RoleRepository(_context);
                 }
                 return _role;
+            }
+        }
+
+        public IRepositoryBase<Comment> Comment
+        {
+            get
+            {
+                if (_comment == null)
+                {
+                    _comment = new CommentRepository(_context);
+                }
+                return _comment;
             }
         }
 

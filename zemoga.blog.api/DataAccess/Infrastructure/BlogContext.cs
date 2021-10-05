@@ -9,7 +9,6 @@ namespace zemoga.blog.api.DataAccess.Infrastructure
         public DbSet<User> Users { get; set; }
         public DbSet<UserRole> UsersRoles { get; set; }
         public DbSet<Role> Roles { get; set; }
-        public DbSet<Blog> Blogs { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Comment> Comments { get; set; }
 
@@ -23,10 +22,6 @@ namespace zemoga.blog.api.DataAccess.Infrastructure
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Blog>()
-                .HasMany(b=>b.Posts)
-                .WithOne(e=>e.Blog);
-
             modelBuilder.Entity<Post>()
                 .HasMany(b => b.Comments)
                 .WithOne(e => e.Post);

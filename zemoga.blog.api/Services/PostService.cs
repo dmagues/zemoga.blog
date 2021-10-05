@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using zemoga.blog.api.DataAccess.Infrastructure;
+using zemoga.blog.api.Business.DTO;
 using zemoga.blog.api.DataAccess.Repositories;
 using zemoga.blog.api.Models;
 
@@ -10,12 +10,16 @@ namespace zemoga.blog.api.Services
 {
     public interface IPostService
     {
-        Task<Post> GetById(int id);
-        Task<List<Post>> GetByUser(int userId);
-        bool ValidateApprove(Post post);
-        void Approve(Post post);
-        Task<IEnumerable<Post>> Get();
-        Task<Post> Delete(int id);
+        Task<PostDTO> GetById(int id);
+        Task<List<PostDTO>> GetByUser(int userId);
+        Task Approve(int id);
+        Task<List<PostDTO>> Get();
+        Task Delete(int id);
+        Task Update(int postId, PostDTO value);
+        Task Create(PostDTO value);
+        Task<List<CommentDTO>> GetCommentsByPostId(int id);
+        Task CreateComment(int postId, CommentDTO comment);
+        Task Reject(int id);
     }
     public class PostService : IPostService
     {
@@ -26,67 +30,192 @@ namespace zemoga.blog.api.Services
             this._repository = repository;
         }
 
-        public async Task<Post> GetById(int id)
+        public async Task<PostDTO> GetById(int id)
         {
-            var post = await this._repository.Post.GetByCondition(p => p.PostId == id);
-            return post.FirstOrDefault();
+            var post = await this._repository.Post.GetByConditionWithIncludes(p => p.PostId == id, p => p.Author);
+            return post.Select(MapPostDTO()).FirstOrDefault();
         }
 
-        public void Approve(Post post)
+        public async Task Approve(int id)
         {
-            if (post == null)
-            {
-                throw new ArgumentException("Post doesn't exists");
-            }
-
+            Post post = await PreCheck(id);
             post.Status = PostStatus.Published;
             this._repository.Post.Update(post);
+            await this ._repository.SaveAsync();
         }
 
-        public async Task<List<Post>> GetByUser(int userId)
+
+        
+
+        public async Task<List<PostDTO>> GetByUser(int userId)
         {
-            var posts = await this._repository.Post.GetByCondition(p => p.AuthorId == userId);
-            return posts.ToList();
+            var posts = await this._repository.Post.GetByConditionWithIncludes(p => p.AuthorId == userId, p => p.Author);
+            return posts.Select(MapPostDTO()).ToList();
         }
 
-        public bool ValidateApprove(Post post)
+        
+        public async Task<List<PostDTO>> Get()
         {
-            if (post == null)
+            var posts = await this._repository.Post.GetAll();
+            return posts.Select(MapPostDTO()).ToList();
+        }
+
+        private static Func<Post, PostDTO> MapPostDTO()
+        {
+            return p => new PostDTO()
             {
-                throw new ArgumentException("Post doesn't exists");
-            }
-
-            
-            if(post.Status != PostStatus.Pending)
-            {
-                return false;
-            }
-            
-            return true;
+                PostId = p.PostId,
+                AuthorId = p.AuthorId,
+                Author = p.Author.UserName,
+                Title = p.Title,
+                Content = p.Content,
+                PublishedDate = p.PublishedDate,
+                Status = p.Status
+            };
         }
 
-        public async Task<List<Post>> Get()
-        {
-            return await this._repository.Post.GetAll();
-        }
 
-        Task<IEnumerable<Post>> IPostService.Get()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<Post> Delete(int id)
+        public async Task Delete(int id)
         {
             var posts = await this._repository.Post.GetByCondition(p => p.PostId == id);
             var postToDelete = posts.FirstOrDefault();
             if (postToDelete != null)
             {
                 this._repository.Post.Delete(postToDelete);
-                return postToDelete;
+                await this._repository.SaveAsync();
+            }
+            else
+            {
+                throw new ArgumentException("Post doesn't exists.");
             }
 
-            return null;
+            
 
+        }
+
+        public async Task Update(int postId, PostDTO value)
+        {
+            var posts = await this._repository.Post.GetByCondition(p => p.PostId == postId);
+            var post = posts.First();
+
+            if (post == null)
+            {
+                throw new ArgumentException("Post doesn't exists."); ;
+            }
+
+            if (post.AuthorId != value.AuthorId)
+            {
+                throw new ApplicationException(string.Format("Post {0} doesn't belong to User", postId));
+            }
+            if (post.Status == PostStatus.Published)
+            {
+                throw new ApplicationException(string.Format("Post {0} is already published.", post.PostId));
+            }
+
+            // TODO: Validate all fields
+            post.PublishedDate = value.PublishedDate;
+            post.AuthorId = value.AuthorId;
+            post.Title = value.Title;
+            post.Content = value.Content;
+            post.Status = PostStatus.Pending;
+
+            this._repository.Post.Update(post);
+            await this._repository.SaveAsync();           
+
+        }
+
+        public async Task Create(PostDTO value)
+        {
+            //TODO: Validate all fields;
+            if (string.IsNullOrEmpty(value.Title))
+            {
+                throw new ApplicationException("Title is required");
+            }
+
+            if (string.IsNullOrEmpty(value.Content))
+            {
+                throw new ApplicationException("Content is required");
+            }
+
+            if (!value.PublishedDate.HasValue)
+            {
+                throw new ApplicationException("Publish Date is required");
+            }
+
+            var post = new Post()
+            {
+                PublishedDate = value.PublishedDate
+                ,AuthorId = value.AuthorId
+                ,Title = value.Title
+                ,Content = value.Content
+                ,Status = PostStatus.Pending
+            };            
+            
+            this._repository.Post.Create(post);
+            await this ._repository.SaveAsync();
+        }
+
+        
+
+        public async Task<List<CommentDTO>> GetCommentsByPostId(int id)
+        {
+            var comments = await this._repository.Comment.GetByConditionWithIncludes(p => p.PostId == id, p => p.Author);
+            return comments.Select(c => new CommentDTO()
+            {
+                CommentId = c.CommentId,
+                PostId = c.PostId,
+                AuthorId = c.AuthorId,
+                Author = c.Author.UserName,
+                Content = c.Content,
+                CommentDate = c.CommentDate
+            }).ToList();
+        }
+
+        public async Task CreateComment(int postId, CommentDTO value)
+        {
+            var post = await this._repository.Post.GetByCondition(p => p.PostId == postId);
+            if (!post.Any())
+            {
+                throw new ApplicationException(string.Format("Post {0} doesn't exists.", postId));
+            }
+
+            var comment = new Comment()
+            {
+                PostId = postId,
+                AuthorId = value.AuthorId,
+                Content = value.Content,
+                CommentDate = value.CommentDate
+            };
+            
+            this._repository.Comment.Create(comment);
+            await this._repository.SaveAsync();
+        }
+
+        public async Task Reject(int id)
+        {
+            Post post = await PreCheck(id);
+
+            post.Status = PostStatus.Rejected;
+            this._repository.Post.Update(post);
+            await this._repository.SaveAsync();
+        }
+
+        private async Task<Post> PreCheck(int id)
+        {
+            var postList = await this._repository.Post.GetByCondition(p => p.PostId == id);
+            if (!postList.Any())
+            {
+                throw new ArgumentException("Post doesn't exists");
+            }
+
+            var post = postList.First();
+
+            if (post.Status != PostStatus.Pending)
+            {
+                throw new ApplicationException(string.Format("Post {0} can't be rejected. Status is not pending.", id));
+            }
+
+            return post;
         }
     }
 }

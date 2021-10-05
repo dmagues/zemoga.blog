@@ -26,7 +26,10 @@ namespace zemoga.blog.api
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder
+                    .UseUrls("http://0.0.0.0:5000/")
+                    .UseKestrel()
+                    .UseStartup<Startup>();                    
                 });
 
         private static void CreateDbIfNotExists(IHost host)

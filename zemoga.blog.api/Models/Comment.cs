@@ -12,7 +12,7 @@ namespace zemoga.blog.api.Models
         [Key]
         public int CommentId { get; set; }
         public string Content { get; set; }
-        public DateTime CommentDate { get; set; }
+        public DateTime? CommentDate { get; set; }
         [ForeignKey(nameof(User))]
         public int AuthorId { get; set; }
         public User Author { get; set; }
