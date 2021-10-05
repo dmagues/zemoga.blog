@@ -90,9 +90,10 @@ namespace zemoga.blog.api.Migrations
                     CommentId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Content = table.Column<string>(type: "TEXT", nullable: true),
-                    CommentDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CommentDate = table.Column<DateTime>(type: "TEXT", nullable: true),
                     AuthorId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PostId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PostId = table.Column<int>(type: "INTEGER", nullable: false),
+                    IsRejected = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -25,11 +25,14 @@ namespace zemoga.blog.api.Migrations
                     b.Property<int>("AuthorId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("CommentDate")
+                    b.Property<DateTime?>("CommentDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Content")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsRejected")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("PostId")
                         .HasColumnType("INTEGER");

@@ -19,6 +19,7 @@ namespace zemoga.blog.api.Models
         [ForeignKey(nameof(Post))]
         public int PostId { get; set; }
         public Post Post { get; set; }
+        public bool IsRejected { get; set; }
 
     }
 }

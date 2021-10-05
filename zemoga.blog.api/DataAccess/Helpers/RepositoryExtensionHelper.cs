@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace zemoga.blog.api.DataAccess.Helpers
 {
-    public static  class ExtensionHelper
+    public static  class RepositoryExtensionHelper
     {
         public static IQueryable<T> IncludeMultiple<T>(this IQueryable<T> query, params Expression<Func<T, object>>[] includes)
             where T : class

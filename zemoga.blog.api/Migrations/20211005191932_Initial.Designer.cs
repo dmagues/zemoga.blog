@@ -9,7 +9,7 @@ using zemoga.blog.api.DataAccess.Infrastructure;
 namespace zemoga.blog.api.Migrations
 {
     [DbContext(typeof(BlogContext))]
-    [Migration("20211005155327_Initial")]
+    [Migration("20211005191932_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,11 +27,14 @@ namespace zemoga.blog.api.Migrations
                     b.Property<int>("AuthorId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("CommentDate")
+                    b.Property<DateTime?>("CommentDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Content")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsRejected")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("PostId")
                         .HasColumnType("INTEGER");
