@@ -14,12 +14,14 @@ namespace zemoga.blog.api.Services
         Task<List<Post>> GetByUser(int userId);
         bool ValidateApprove(Post post);
         void Approve(Post post);
+        Task<IEnumerable<Post>> Get();
+        Task<Post> Delete(int id);
     }
     public class PostService : IPostService
     {
-        private RepositoryWrapper _repository;
+        private IRepositoryWrapper _repository;
 
-        public PostService(RepositoryWrapper repository)
+        public PostService(IRepositoryWrapper repository)
         {
             this._repository = repository;
         }
@@ -61,6 +63,30 @@ namespace zemoga.blog.api.Services
             }
             
             return true;
+        }
+
+        public async Task<List<Post>> Get()
+        {
+            return await this._repository.Post.GetAll();
+        }
+
+        Task<IEnumerable<Post>> IPostService.Get()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Post> Delete(int id)
+        {
+            var posts = await this._repository.Post.GetByCondition(p => p.PostId == id);
+            var postToDelete = posts.FirstOrDefault();
+            if (postToDelete != null)
+            {
+                this._repository.Post.Delete(postToDelete);
+                return postToDelete;
+            }
+
+            return null;
+
         }
     }
 }

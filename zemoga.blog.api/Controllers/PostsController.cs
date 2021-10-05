@@ -3,10 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
-
 using zemoga.blog.api.Models;
 using zemoga.blog.api.Services;
 
@@ -19,11 +17,11 @@ namespace zemoga.blog.api.Controllers
     [ApiController]
     public class PostsController : ControllerBase
     {
-        private IPostService _service;
+        private IPostService _postService;
 
         public PostsController(IPostService postService)
         {
-            this._service = postService;
+            this._postService = postService;
         }
 
         [HttpGet("me")]
@@ -34,23 +32,23 @@ namespace zemoga.blog.api.Controllers
              c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (!string.IsNullOrEmpty(userId))
             {
-                return await this._service.GetByUser(int.Parse(userId));
+                return await this._postService.GetByUser(int.Parse(userId));
             }
 
             return Array.Empty<Post>();
         }
         // GET: api/<PostsController>
         [HttpGet]        
-        public IEnumerable<Post> Get()
+        public async Task<IEnumerable<Post>> Get()
         {
-            return new Post[] { };
+            return await this._postService.Get();
         }
 
         // GET api/<PostsController>/5
         [HttpGet("{id}")]        
-        public Post Get(int id)
+        public async Task<Post> Get(int id)
         {
-            return null;
+            return await this._postService.GetById(id);
         }
 
         [HttpGet("{id}/comments")]
@@ -84,35 +82,44 @@ namespace zemoga.blog.api.Controllers
         [Authorize(Roles = "Writer")]
         public void Put(int id, [FromBody] Post value)
         {
+
         }
 
         // DELETE api/<PostsController>/5
         [HttpDelete("{id}")]
         [Authorize(Roles = "Writer")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+            var post = await this._postService.Delete(id);
+            if(post != null)
+            {
+                return StatusCode(204);
+            }
+
+            return NotFound("Post doesn't exists");
         }
 
         [HttpPut("{id}/approve")]
         [Authorize(Roles = "Editor")]
-        public async Task PutApproveAsync(int id)
+        public async Task<IActionResult> PutApproveAsync(int id)
         {
             try
             {
-                var post = await this._service.GetById(id);
-                if (this._service.ValidateApprove(post))
+                var post = await this._postService.GetById(id);
+                if (this._postService.ValidateApprove(post))
                 {
-                    BadRequest(String.Format("Post {0} can't be apporved. Invalid status!", id));
+                    return BadRequest (String.Format("Post {0} can't be apporved. Invalid status!", id));
                 }
 
-                this._service.Approve(post);
+                this._postService.Approve(post);
+                return Ok();
 
             }catch(ArgumentException argEx)
             {
-                BadRequest(argEx.Message);
+                return NotFound(argEx.Message);
             }catch(Exception ex)
             {
-                StatusCode(500, ex.Message);
+                return StatusCode(500, ex.Message);
             }            
         }
 

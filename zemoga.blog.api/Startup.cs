@@ -72,10 +72,7 @@ namespace zemoga.blog.api
 
         }
 
-        public void ConfigureBusinessServices(IServiceCollection services)
-        {
-            services.AddTransient<IUserService, UserService>();
-        }
+       
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -101,7 +98,7 @@ namespace zemoga.blog.api
         {
             // The following configures EF to create a Sqlite database file in the
             // special "local" folder for your platform.
-            var folder = Environment.SpecialFolder.MyDocuments;
+            var folder = Environment.SpecialFolder.LocalApplicationData;
             var path = Environment.GetFolderPath(folder);
             var DbPath = $"{path}{System.IO.Path.DirectorySeparatorChar}blogging.db";
 
@@ -113,6 +110,12 @@ namespace zemoga.blog.api
         {
             services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
         }
-       
+
+        public void ConfigureBusinessServices(IServiceCollection services)
+        {
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPostService, PostService>();
+        }
+
     }
 }
