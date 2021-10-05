@@ -35,10 +35,6 @@ namespace zemoga.blog.api.Services
         /// <returns></returns>
         public async Task Register(UserRegisterDTO userRegister)
         {
-            var roles = await _repository.Role.GetAll();
-
-
-
             var user = new User()
             {
                 UserName = userRegister.Username,
@@ -46,16 +42,34 @@ namespace zemoga.blog.api.Services
             };
 
             this._repository.User.Create(user);
-            await this._repository.SaveAsync();         
-            
+            await this._repository.SaveAsync();
+            // add public as default            
+            var defaultUserRole = new UserRole() { UserId = user.UserId, RoleId = 1 };
+            this._repository.UserRole.Create(defaultUserRole);
+            await this._repository.SaveAsync();
+
+            var userRolesAdded = new List<UserRole>
+            {
+                defaultUserRole
+            };
+
+            var roles = await this._repository.Role.GetAll();
+
             foreach (var r in userRegister.Roles)
             {
-                var userRole = (new UserRole()
+                if (!userRolesAdded.Any(ur => ur.RoleId == r) && roles.Any(role=>role.RoleId == r))
                 {
-                    UserId = user.UserId,
-                    RoleId = r
-                });
-                this._repository.UserRole.Create(userRole);
+                    
+                    var userRole = (new UserRole()
+                    {
+                        UserId = user.UserId,
+                        RoleId = r
+                    });
+                    userRolesAdded.Add(userRole);
+                    this._repository.UserRole.Create(userRole);
+                    
+                }                
+                
             }
             await this._repository.SaveAsync();
 

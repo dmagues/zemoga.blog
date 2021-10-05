@@ -18,8 +18,8 @@ namespace zemoga.blog.api.Controllers
     [ApiController]
     public class PostsController : ControllerBase
     {
-        private IPostService _postService;
-        private ILogger<PostsController> _logger;
+        private readonly IPostService _postService;
+        private readonly ILogger<PostsController> _logger;
 
         private int UserId => int.Parse(HttpContext.User.Claims.FirstOrDefault(
              c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "0");
@@ -145,11 +145,15 @@ namespace zemoga.blog.api.Controllers
         {
             try
             {
-                await this._postService.Delete(id);
+                await this._postService.Delete(id, UserId);
                 return StatusCode(204);
             }catch(ArgumentException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (ApplicationException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

@@ -14,7 +14,7 @@ namespace zemoga.blog.api.Services
         Task<List<PostDTO>> GetByUser(int userId);
         Task Approve(int id);
         Task<List<PostDTO>> Get();
-        Task Delete(int id);
+        Task Delete(int id, int userId);
         Task Update(int postId, PostDTO value);
         Task Create(PostDTO value);
         Task<List<CommentDTO>> GetCommentsByPostId(int id);
@@ -23,7 +23,7 @@ namespace zemoga.blog.api.Services
     }
     public class PostService : IPostService
     {
-        private IRepositoryWrapper _repository;
+        private readonly IRepositoryWrapper _repository;
 
         public PostService(IRepositoryWrapper repository)
         {
@@ -75,21 +75,26 @@ namespace zemoga.blog.api.Services
         }
 
 
-        public async Task Delete(int id)
+        public async Task Delete(int id, int userId)
         {
             var posts = await this._repository.Post.GetByCondition(p => p.PostId == id);
             var postToDelete = posts.FirstOrDefault();
-            if (postToDelete != null)
+
+
+            if (postToDelete == null)
             {
-                this._repository.Post.Delete(postToDelete);
-                await this._repository.SaveAsync();
-            }
-            else
-            {
-                throw new ArgumentException("Post doesn't exists.");
+                throw new ArgumentException("Post doesn't exists.");                
             }
 
-            
+            if(postToDelete.AuthorId != userId)
+            {
+                throw new ApplicationException("Post doesn't belong to the user.");
+            }
+
+            this._repository.Post.Delete(postToDelete);
+            await this._repository.SaveAsync();
+
+
 
         }
 
@@ -100,7 +105,7 @@ namespace zemoga.blog.api.Services
 
             if (post == null)
             {
-                throw new ArgumentException("Post doesn't exists."); ;
+                throw new ArgumentException("Post doesn't exists.");
             }
 
             if (post.AuthorId != value.AuthorId)

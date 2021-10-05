@@ -22,35 +22,35 @@ namespace zemoga.blog.api.DataAccess.Repositories
 
     public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : class
     {
-        protected BlogContext _blogContext { get; set; }
+        protected BlogContext BlogContext { get; set; }
         public RepositoryBase(BlogContext blogContext)
         {
-            this._blogContext = blogContext;
+            this.BlogContext = blogContext;
         }
         public async Task<List<T>> GetAll()
         {
-            return await this._blogContext.Set<T>().ToListAsync();
+            return await this.BlogContext.Set<T>().ToListAsync();
         }
         public async Task<List<T>> GetByCondition(Expression<Func<T, bool>> expression)
         {
-            return await this._blogContext.Set<T>().Where(expression).ToListAsync();
+            return await this.BlogContext.Set<T>().Where(expression).ToListAsync();
         }
 
         public async Task<List<T>> GetByConditionWithIncludes(Expression<Func<T, bool>> expression, params Expression<Func<T, object>>[] includes)
         {
-            return await this._blogContext.Set<T>().Where(expression).IncludeMultiple(includes).ToListAsync();
+            return await this.BlogContext.Set<T>().Where(expression).IncludeMultiple(includes).ToListAsync();
         }
         public void Create(T entity)
         {
-            this._blogContext.Set<T>().Add(entity);
+            this.BlogContext.Set<T>().Add(entity);
         }
         public void Update(T entity)
         {
-            this._blogContext.Set<T>().Update(entity);
+            this.BlogContext.Set<T>().Update(entity);
         }
         public void Delete(T entity)
         {
-            this._blogContext.Set<T>().Remove(entity);
+            this.BlogContext.Set<T>().Remove(entity);
         }
         
 

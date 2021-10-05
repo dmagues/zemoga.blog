@@ -31,7 +31,7 @@ namespace zemoga.blog.test
         public void ItShouldNotDeletePostWhenNotFound()
         {
             var postService = new PostService(new RepositoryWrapper(_context));
-            Assert.Throws<ArgumentException>(async () => await postService.Delete(1));
+            Assert.Throws<ArgumentException>(async () => await postService.Delete(1, 1));
 
         }
     }

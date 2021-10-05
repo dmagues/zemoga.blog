@@ -16,7 +16,7 @@ namespace zemoga.blog.api.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private IUserService _userService;
+        private readonly IUserService _userService;
 
         public UsersController(IUserService userService)
         {
