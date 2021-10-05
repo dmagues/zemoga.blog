@@ -24,8 +24,21 @@ namespace zemoga.blog.api.Services
         }
         
 
+        /// <summary>
+        /// Register a new User passing username, password and roles
+        /// For Roles, you can set an int array of roles with the following values:
+        /// 1 - Public 
+        /// 2 - Writer 
+        /// 3 - Editor
+        /// </summary>
+        /// <param name="userRegister"></param>
+        /// <returns></returns>
         public async Task Register(UserRegisterDTO userRegister)
         {
+            var roles = await _repository.Role.GetAll();
+
+
+
             var user = new User()
             {
                 UserName = userRegister.Username,
@@ -48,6 +61,12 @@ namespace zemoga.blog.api.Services
 
         }
 
+        /// <summary>
+        /// Verify the credentials of a user
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         public async Task<UserDTO> VerifyCredentials(string username, string password)
         {
             var user =  await _repository.User.GetByCondition(u => u.UserName == username && u.Password == password);
