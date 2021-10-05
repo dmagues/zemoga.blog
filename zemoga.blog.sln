@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31424.327
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "zemoga.blog.api", "zemoga.blog.api\zemoga.blog.api.csproj", "{0DFE8BE9-3142-4025-859D-95F80FA46CA8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zemoga.blog.test", "zemoga.blog.test\zemoga.blog.test.csproj", "{3ABD4EDC-E523-4A32-A7DE-514DAB37DCF2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0DFE8BE9-3142-4025-859D-95F80FA46CA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DFE8BE9-3142-4025-859D-95F80FA46CA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DFE8BE9-3142-4025-859D-95F80FA46CA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DFE8BE9-3142-4025-859D-95F80FA46CA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3ABD4EDC-E523-4A32-A7DE-514DAB37DCF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ABD4EDC-E523-4A32-A7DE-514DAB37DCF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ABD4EDC-E523-4A32-A7DE-514DAB37DCF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ABD4EDC-E523-4A32-A7DE-514DAB37DCF2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6CF1A2E6-CC37-4D78-B8CE-005F8C0717E3}
+	EndGlobalSection
+EndGlobal
