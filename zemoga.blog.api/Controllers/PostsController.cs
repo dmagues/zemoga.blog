@@ -56,7 +56,15 @@ namespace zemoga.blog.api.Controllers
         [HttpGet("{id}/comments")]
         public async Task<List<CommentDTO>> GetComment(int id)
         {
-            return await this._postService.GetCommentsByPostId(id);
+            var post = await this._postService.GetById(id);
+            var comments = await this._postService.GetCommentsByPostId(id);
+
+            if(post.AuthorId != UserId)
+            {
+                return comments.Where(c => !c.IsRejected).ToList();
+            }
+
+            return comments;
         }
 
         [HttpPost("{id}/comments")]
@@ -178,11 +186,12 @@ namespace zemoga.blog.api.Controllers
 
         [HttpPut("{id}/reject")]
         [Authorize(Roles = "Editor")]
-        public async Task<IActionResult> PutReject(int id)
+        public async Task<IActionResult> PutReject(int id, CommentDTO comment)
         {
             try
             {
-                await this._postService.Reject(id);
+                comment.AuthorId = UserId;
+                await this._postService.Reject(id, comment);
                 return Ok();
 
             }

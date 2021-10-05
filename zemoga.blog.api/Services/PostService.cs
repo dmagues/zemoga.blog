@@ -19,7 +19,7 @@ namespace zemoga.blog.api.Services
         Task Create(PostDTO value);
         Task<List<CommentDTO>> GetCommentsByPostId(int id);
         Task CreateComment(int postId, CommentDTO comment);
-        Task Reject(int id);
+        Task Reject(int id, CommentDTO coment);
     }
     public class PostService : IPostService
     {
@@ -153,9 +153,7 @@ namespace zemoga.blog.api.Services
             
             this._repository.Post.Create(post);
             await this ._repository.SaveAsync();
-        }
-
-        
+        }        
 
         public async Task<List<CommentDTO>> GetCommentsByPostId(int id)
         {
@@ -167,7 +165,8 @@ namespace zemoga.blog.api.Services
                 AuthorId = c.AuthorId,
                 Author = c.Author.UserName,
                 Content = c.Content,
-                CommentDate = c.CommentDate
+                CommentDate = c.CommentDate,
+                IsRejected = c.IsRejected
             }).ToList();
         }
 
@@ -191,11 +190,20 @@ namespace zemoga.blog.api.Services
             await this._repository.SaveAsync();
         }
 
-        public async Task Reject(int id)
+        public async Task Reject(int id, CommentDTO value)
         {
             Post post = await PreCheck(id);
 
             post.Status = PostStatus.Rejected;
+            var comment = new Comment()
+            {
+                PostId = id,
+                AuthorId = value.AuthorId,
+                Content = value.Content,
+                CommentDate = value.CommentDate,
+                IsRejected = true
+            };
+            this._repository.Comment.Create(comment);
             this._repository.Post.Update(post);
             await this._repository.SaveAsync();
         }
