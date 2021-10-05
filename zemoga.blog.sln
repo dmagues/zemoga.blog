@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "zemoga.blog.api", "zemoga.blog.api\zemoga.blog.api.csproj", "{0DFE8BE9-3142-4025-859D-95F80FA46CA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zemoga.blog.test", "zemoga.blog.test\zemoga.blog.test.csproj", "{3ABD4EDC-E523-4A32-A7DE-514DAB37DCF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "zemoga.blog.test", "zemoga.blog.test\zemoga.blog.test.csproj", "{3ABD4EDC-E523-4A32-A7DE-514DAB37DCF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zemoga.blog.webui", "zemoga.blog.webui\zemoga.blog.webui.csproj", "{A95E6FA2-477C-4F29-8012-5EF68EE90781}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{3ABD4EDC-E523-4A32-A7DE-514DAB37DCF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3ABD4EDC-E523-4A32-A7DE-514DAB37DCF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3ABD4EDC-E523-4A32-A7DE-514DAB37DCF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A95E6FA2-477C-4F29-8012-5EF68EE90781}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A95E6FA2-477C-4F29-8012-5EF68EE90781}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A95E6FA2-477C-4F29-8012-5EF68EE90781}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A95E6FA2-477C-4F29-8012-5EF68EE90781}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

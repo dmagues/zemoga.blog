@@ -12,7 +12,7 @@ using zemoga.blog.api.Services;
 
 namespace zemoga.blog.api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/users")]
     [ApiController]
     public class UsersController : ControllerBase
     {
