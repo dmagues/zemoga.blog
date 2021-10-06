@@ -27,7 +27,7 @@ namespace zemoga.blog.api
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
-                    .UseUrls("http://0.0.0.0:5000/")
+                    .UseUrls("http://0.0.0.0:5001/")
                     .UseKestrel()
                     .UseStartup<Startup>();                    
                 });

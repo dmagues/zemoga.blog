@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace zemoga.blog.webui.Business
+namespace zemoga.blog.webui.Business.DTO
 {
     public class UserRegisterDTO
     {

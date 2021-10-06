@@ -8,5 +8,6 @@ namespace zemoga.blog.webui.Runtime
     public class AppSettings
     {
         public string RestApiUrl { get; set; }
+        public string SecretPhrase { get; set; }
     }
 }

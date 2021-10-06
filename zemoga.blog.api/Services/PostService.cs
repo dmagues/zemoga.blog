@@ -13,7 +13,7 @@ namespace zemoga.blog.api.Services
         Task<PostDTO> GetById(int id);
         Task<List<PostDTO>> GetByUser(int userId);
         Task Approve(int id);
-        Task<List<PostDTO>> Get();
+        Task<List<PostDTO>> Get(int? status);
         Task Delete(int id, int userId);
         Task Update(int postId, PostDTO value);
         Task Create(PostDTO value);
@@ -54,10 +54,18 @@ namespace zemoga.blog.api.Services
         }
 
         
-        public async Task<List<PostDTO>> Get()
+        public async Task<List<PostDTO>> Get(int? status)
         {
-            var posts = await this._repository.Post.GetAll();
-            return posts.Select(MapPostDTO()).ToList();
+            if (status.HasValue) {
+                var posts = await this._repository.Post.GetByConditionWithIncludes(p => p.Status == (PostStatus)status, p => p.Author);
+                return posts.Select(MapPostDTO()).ToList();
+            }
+            else
+            {
+                var posts = await this._repository.Post.GetAllWithIncludes(p => p.Author);
+                return posts.Select(MapPostDTO()).ToList();
+            }
+            
         }
 
         private static Func<Post, PostDTO> MapPostDTO()

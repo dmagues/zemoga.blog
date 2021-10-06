@@ -13,6 +13,7 @@ using zemoga.blog.api.Services;
 
 namespace zemoga.blog.api.Controllers
 {
+    [Produces("application/json")]
     [Route("api/posts")]
     [Authorize]
     [ApiController]
@@ -41,9 +42,9 @@ namespace zemoga.blog.api.Controllers
         }
         // GET: api/<PostsController>
         [HttpGet]        
-        public async Task<IEnumerable<PostDTO>> Get()
+        public async Task<IEnumerable<PostDTO>> Get(int? status)
         {
-            return await this._postService.Get();
+            return await this._postService.Get(status);
         }
 
         // GET api/<PostsController>/5
@@ -74,7 +75,7 @@ namespace zemoga.blog.api.Controllers
             {
                 comment.AuthorId = UserId; ;
                 await this._postService.CreateComment(id, comment);
-                return Ok();
+                return StatusCode(201);
             }catch(ApplicationException ex)
             {
                 return BadRequest(ex.Message);
@@ -102,7 +103,7 @@ namespace zemoga.blog.api.Controllers
             {
                 value.AuthorId = UserId;
                 await this._postService.Create(value);
-                return Ok();
+                return StatusCode(201); ;
             }
             catch (ApplicationException ex)
             {

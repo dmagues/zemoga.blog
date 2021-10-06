@@ -13,6 +13,7 @@ namespace zemoga.blog.api.DataAccess.Repositories
     public interface IRepositoryBase<T>
     {
         Task<List<T>> GetAll();
+        Task<List<T>> GetAllWithIncludes(params Expression<Func<T, object>>[] includes);
         Task<List<T>> GetByCondition(Expression<Func<T, bool>> expression);
         Task<List<T>> GetByConditionWithIncludes(Expression<Func<T, bool>> expression, params Expression<Func<T, object>>[] includes);
         void Create(T entity);
@@ -30,6 +31,11 @@ namespace zemoga.blog.api.DataAccess.Repositories
         public async Task<List<T>> GetAll()
         {
             return await this.BlogContext.Set<T>().ToListAsync();
+        }
+
+        public async Task<List<T>> GetAllWithIncludes(params Expression<Func<T, object>>[] includes)
+        {
+            return await this.BlogContext.Set<T>().IncludeMultiple(includes).ToListAsync();
         }
         public async Task<List<T>> GetByCondition(Expression<Func<T, bool>> expression)
         {

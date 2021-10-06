@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace zemoga.blog.webui.Business
+namespace zemoga.blog.webui.Models
 {
-    public class CommentDTO
+    public class CommentModel
     {
         public int CommentId { get; set; }
         public int PostId { get; set; }

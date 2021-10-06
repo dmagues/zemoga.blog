@@ -1,12 +1,11 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using zemoga.blog.webui.Business.REST;
 using zemoga.blog.webui.Runtime;
 
 namespace zemoga.blog.webui
@@ -24,7 +23,14 @@ namespace zemoga.blog.webui
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
-            
+            services.AddHttpContextAccessor();
+            services.AddScoped<IUserRestApiClient, UserRestApiClient>();
+            services.AddScoped<IPostRestApiClient, PostRestApiClient>();
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie( options =>
+                {
+                    options.LoginPath = new PathString("/user/login");
+                });
             services.AddControllersWithViews();
         }
 
@@ -49,6 +55,7 @@ namespace zemoga.blog.webui
                 .AllowAnyMethod()
                 .AllowAnyHeader());
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
