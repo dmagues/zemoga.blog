@@ -9,7 +9,7 @@ using zemoga.blog.api.DataAccess.Infrastructure;
 namespace zemoga.blog.api.Migrations
 {
     [DbContext(typeof(BlogContext))]
-    [Migration("20211005191932_Initial")]
+    [Migration("20211006234110_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
