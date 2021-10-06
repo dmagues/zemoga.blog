@@ -1,5 +1,5 @@
 
-## Welcome to Zemoga Blog.
+## Welcome to Zemoga Blog
 
 The blog consist of 2 projects:
 
